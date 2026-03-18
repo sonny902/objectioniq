@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cobalttech — Objection Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07090f;
+    --surface: #0d1120;
+    --surface2: #111827;
+    --border: #1e2a40;
+    --accent: #4f8ef7;
+    --accent-bright: #6fa8ff;
+    --accent-glow: rgba(79,142,247,0.18);
+    --accent2: #00c2ff;
+    --text: #e8edf5;
+    --muted: #5a6a85;
+    --success: #3ddc84;
+    --danger: #ff4757;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Cobalt grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .logo-text {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .stat-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  .stat-pill span {
+    color: var(--accent-bright);
+    font-weight: 500;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 28px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* INPUTS */
+  .input-group { margin-bottom: 14px; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 7px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: rgba(79,142,247,0.5);
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.08);
+  }
+
+  select option { background: var(--surface2); }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-bright);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(79,142,247,0.35);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover { border-color: var(--muted); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid rgba(255,71,87,0.3);
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .btn-danger:hover { background: rgba(255,71,87,0.08); }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* AI RESPONSE AREA */
+  .ai-response {
+    background: var(--surface2);
+    border: 1px solid rgba(79,142,247,0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .ai-response.visible { display: block; }
+
+  .ai-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    margin-bottom: 14px;
+  }
+
+  .ai-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  .response-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  /* LOADING */
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    box-shadow: 0 0 6px var(--accent-glow);
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* OBJECTION LOG TABLE */
+  .log-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .log-empty .icon { font-size: 32px; margin-bottom: 10px; }
+
+  .objection-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .objection-item:last-child { border-bottom: none; }
+
+  .obj-content { flex: 1; }
+
+  .obj-text {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+
+  .obj-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+
+  .tag-category {
+    background: rgba(79,142,247,0.12);
+    color: var(--accent-bright);
+    border: 1px solid rgba(79,142,247,0.25);
+  }
+
+  .tag-outcome {
+    background: rgba(61,220,132,0.1);
+    color: var(--success);
+    border: 1px solid rgba(61,220,132,0.2);
+  }
+
+  .tag-outcome.lost {
+    background: rgba(255,71,87,0.1);
+    color: var(--danger);
+    border: 1px solid rgba(255,71,87,0.2);
+  }
+
+  .tag-outcome.pending {
+    background: rgba(255,107,53,0.1);
+    color: var(--accent2);
+    border: 1px solid rgba(255,107,53,0.2);
+  }
+
+  .obj-response-preview {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent-bright);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* QUICK SELECT DROPDOWN */
+  .common-objections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .quick-tag {
+    font-size: 12px;
+    padding: 5px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .quick-tag:hover {
+    border-color: var(--accent);
+    color: var(--accent-bright);
+    background: rgba(79,142,247,0.08);
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  /* COPY BUTTON */
+  .copy-btn {
+    font-size: 12px;
+    padding: 6px 14px;
+    background: rgba(79,142,247,0.1);
+    border: 1px solid rgba(79,142,247,0.25);
+    border-radius: 8px;
+    color: var(--accent-bright);
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    transition: all 0.15s;
+    margin-top: 12px;
+  }
+
+  .copy-btn:hover { background: rgba(79,142,247,0.18); }
+
+  /* DATA COUNT WARNING */
+  .data-warning {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(79,142,247,0.07);
+    border: 1px solid rgba(79,142,247,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--accent-bright);
+    margin-bottom: 16px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo">
+      <span class="logo-text">Cobalttech</span>
+      <span class="logo-dot"></span>
+      <span style="font-size:13px;font-weight:500;color:var(--muted);margin-left:2px">Objection Coach</span>
+    </div>
+    <div class="stat-pill">Data points: <span id="header-count">0</span> / 30 min</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('coach')">🎯 AI Coach</button>
+    <button class="tab" onclick="switchTab('log')">📋 Log Objection</button>
+    <button class="tab" onclick="switchTab('data')">📊 Data</button>
+  </div>
+
+  <!-- ===== TAB: AI COACH ===== -->
+  <div id="tab-coach" class="tab-content active">
+
+    <div id="api-key-card" class="card" style="border-color:rgba(79,142,247,0.3)">
+      <div class="card-title">🔑 API Key</div>
+      <div class="input-group" style="margin-bottom:10px">
+        <input type="password" id="api-key-input" placeholder="Paste your sk-ant-... key here" oninput="saveApiKey(this.value)">
+      </div>
+      <div id="api-key-status" style="font-size:12px;color:var(--muted)">No key saved — get yours at console.anthropic.com</div>
+    </div>
+
+    <div id="data-warning" class="data-warning" style="display:none">
+      ⚠️ Less than 30 objections logged — AI accuracy improves with more data.
+      <div class="progress-bar-wrap" style="flex:1">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Common Objections — Quick Select</div>
+      <div class="common-objections" id="quick-objections">
+        <!-- dynamically populated from logged data + defaults -->
+      </div>
+      <div class="input-group">
+        <label>Type or paste the objection</label>
+        <textarea id="objection-input" rows="3" placeholder="e.g. 'We already have a solution for that' or 'Your price is too high'..."></textarea>
+      </div>
+      <div class="input-group">
+        <label>Context (optional)</label>
+        <input type="text" id="context-input" placeholder="e.g. SMB prospect, mid-call, 2nd conversation...">
+      </div>
+      <button class="btn btn-primary" onclick="getAIResponse()" id="coach-btn">
+        <span>Get Response Strategy</span>
+        <span>→</span>
+      </button>
+    </div>
+
+    <div class="ai-response" id="ai-response-box">
+      <div class="ai-label">Cobalttech AI Response</div>
+      <div class="response-text" id="ai-response-text"></div>
+      <button class="copy-btn" onclick="copyResponse()">Copy response</button>
+    </div>
+
+  </div>
+
+  <!-- ===== TAB: LOG OBJECTION ===== -->
+  <div id="tab-log" class="tab-content">
+    <div class="card">
+      <div class="card-title">Log a New Objection</div>
+
+      <div class="input-group">
+        <label>Objection / Rejection</label>
+        <textarea id="log-objection" rows="2" placeholder="Exactly what they said..."></textarea>
+      </div>
+
+      <div class="input-group">
+        <label>Category</label>
+        <select id="log-category">
+          <option value="Price">Price</option>
+          <option value="Timing">Timing</option>
+          <option value="Competitor">Already have solution / Competitor</option>
+          <option value="Authority">Need to talk to someone else</option>
+          <option value="Trust">Trust / Credibility</option>
+          <option value="Need">Don't see the need</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Your response (what you said)</label>
+        <textarea id="log-response" rows="2" placeholder="How you responded to it..."></textarea>
+      </div>
+
+      <div class="input-group">
+        <label>Outcome</label>
+        <select id="log-outcome">
+          <option value="Won">Won — Overcame it ✅</option>
+          <option value="Lost">Lost — Couldn't overcome it ❌</option>
+          <option value="Pending">Pending — Still in play ⏳</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Notes (optional)</label>
+        <input type="text" id="log-notes" placeholder="Any context about why it worked / didn't...">
+      </div>
+
+      <button class="btn btn-primary" onclick="logObjection()" id="log-btn">
+        Save to Data
+      </button>
+      <span id="log-status" style="font-size:13px;color:var(--success);margin-left:12px;display:none">✓ Saved!</span>
+    </div>
+  </div>
+
+  <!-- ===== TAB: DATA ===== -->
+  <div id="tab-data" class="tab-content">
+
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Logged</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-won">0</div><div class="stat-label">Overcame</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-rate">0%</div><div class="stat-label">Win Rate</div></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:0">Objection Log</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" style="font-size:12px;padding:7px 14px" onclick="exportCSV()">Export CSV</button>
+          <button class="btn btn-danger" onclick="clearData()">Clear all</button>
+        </div>
+      </div>
+      <div id="objection-list">
+        <div class="log-empty"><div class="icon">📋</div>No objections logged yet.<br>Go to <b>Log Objection</b> to start building your dataset.</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'objectioniq_data';
+
+// ─── Storage helpers ───────────────────────────────
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+}
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ─── Tabs ──────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['coach','log','data'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'data') renderData();
+  if (name === 'coach') updateQuickTags();
+}
+
+// ─── Quick Tags ────────────────────────────────────
+const DEFAULT_QUICK = [
+  "Price is too high",
+  "Not the right time",
+  "Already have a solution",
+  "Need to check with my boss",
+  "Send me some info",
+  "We're happy with what we have"
+];
+
+function updateQuickTags() {
+  const data = loadData();
+  const container = document.getElementById('quick-objections');
+  const count = data.length;
+
+  // Update header count + warning
+  document.getElementById('header-count').textContent = count;
+  const warn = document.getElementById('data-warning');
+  if (count < 30) {
+    warn.style.display = 'flex';
+    document.getElementById('progress-fill').style.width = (count/30*100) + '%';
+  } else {
+    warn.style.display = 'none';
+  }
+
+  // Get top recurring objections from data
+  const freq = {};
+  data.forEach(d => { const k = d.objection.slice(0,60); freq[k] = (freq[k]||0)+1; });
+  const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
+
+  const tags = top.length >= 4 ? top : [...DEFAULT_QUICK.slice(0, 6 - top.length), ...top];
+  container.innerHTML = tags.map(t =>
+    `<button class="quick-tag" onclick="setObjection(this.textContent)">${t}</button>`
+  ).join('');
+}
+
+function setObjection(text) {
+  document.getElementById('objection-input').value = text;
+}
+
+// ─── AI Coach ─────────────────────────────────────
+async function getAIResponse() {
+  const objection = document.getElementById('objection-input').value.trim();
+  if (!objection) { alert('Please enter an objection first.'); return; }
+
+  const context = document.getElementById('context-input').value.trim();
+  const data = loadData();
+  const btn = document.getElementById('coach-btn');
+  const box = document.getElementById('ai-response-box');
+  const textEl = document.getElementById('ai-response-text');
+
+  btn.disabled = true;
+  box.classList.add('visible');
+  textEl.innerHTML = '<div class="loading"><div class="spinner"></div>Analyzing your objection data...</div>';
+
+  // Build context from logged objections
+  let dataContext = '';
+  if (data.length > 0) {
+    const relevant = data.filter(d =>
+      d.objection.toLowerCase().includes(objection.toLowerCase().split(' ')[0]) ||
+      objection.toLowerCase().includes(d.objection.toLowerCase().split(' ')[0])
+    ).slice(0, 15);
+
+    const sample = relevant.length > 0 ? relevant : data.slice(-20);
+
+    dataContext = `\n\nHISTORICAL OBJECTION DATA (from ${data.length} logged objections):\n` +
+      sample.map(d => `• Objection: "${d.objection}" | Category: ${d.category} | Response used: "${d.response || 'not recorded'}" | Outcome: ${d.outcome}`).join('\n');
+  }
+
+  const prompt = `You are an elite sales coach. A rep is facing this objection${context ? ` (context: ${context})` : ''}:
+
+"${objection}"
+${dataContext}
+
+Provide a practical response strategy with:
+
+1. REFRAME (1 sentence) — shift their mental frame
+2. RESPONSE SCRIPT (2-3 sentences they can say word-for-word)
+3. FOLLOW-UP QUESTION (1 question to keep them talking)
+4. PATTERN NOTE — based on the data, what's the win pattern for this type of objection?
+
+Be direct, tactical, and conversational. No fluff.`;
+
+  try {
+    const apiKey = localStorage.getItem('cobalttech_api_key') || '';
+    if (!apiKey) {
+      textEl.textContent = 'Please paste your Anthropic API key in the box above first.';
+      btn.disabled = false;
+      return;
+    }
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const json = await res.json();
+    const text = json.content?.[0]?.text || 'No response received.';
+    textEl.textContent = text;
+  } catch (e) {
+    textEl.textContent = 'Error reaching AI. Check your connection and try again.';
+  }
+
+  btn.disabled = false;
+}
+
+function copyResponse() {
+  const text = document.getElementById('ai-response-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy response', 2000);
+  });
+}
+
+// ─── Log Objection ────────────────────────────────
+function logObjection() {
+  const objection = document.getElementById('log-objection').value.trim();
+  const response = document.getElementById('log-response').value.trim();
+  if (!objection) { alert('Please enter the objection text.'); return; }
+
+  const entry = {
+    id: Date.now(),
+    objection,
+    category: document.getElementById('log-category').value,
+    response,
+    outcome: document.getElementById('log-outcome').value,
+    notes: document.getElementById('log-notes').value.trim(),
+    date: new Date().toISOString().split('T')[0]
+  };
+
+  const data = loadData();
+  data.push(entry);
+  saveData(data);
+
+  // Reset form
+  ['log-objection','log-response','log-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('log-outcome').value = 'Won';
+
+  const status = document.getElementById('log-status');
+  status.style.display = 'inline';
+  setTimeout(() => status.style.display = 'none', 2000);
+
+  document.getElementById('header-count').textContent = data.length;
+  updateQuickTags();
+}
+
+// ─── Data Tab ─────────────────────────────────────
+function renderData() {
+  const data = loadData();
+  const won = data.filter(d => d.outcome === 'Won').length;
+
+  document.getElementById('stat-total').textContent = data.length;
+  document.getElementById('stat-won').textContent = won;
+  document.getElementById('stat-rate').textContent = data.length ? Math.round(won/data.length*100) + '%' : '0%';
+
+  const list = document.getElementById('objection-list');
+  if (!data.length) {
+    list.innerHTML = '<div class="log-empty"><div class="icon">📋</div>No objections logged yet.</div>';
+    return;
+  }
+
+  list.innerHTML = [...data].reverse().map(d => `
+    <div class="objection-item">
+      <div class="obj-content">
+        <div class="obj-text">${escHtml(d.objection)}</div>
+        ${d.response ? `<div class="obj-response-preview">"${escHtml(d.response.slice(0,80))}${d.response.length>80?'…':''}"</div>` : ''}
+        <div class="obj-meta" style="margin-top:6px">
+          <span class="tag tag-category">${d.category}</span>
+          <span class="tag tag-outcome ${d.outcome==='Lost'?'lost':d.outcome==='Pending'?'pending':''}">${d.outcome}</span>
+          <span style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${d.date}</span>
+        </div>
+      </div>
+      <button class="btn btn-danger" onclick="deleteEntry(${d.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+function deleteEntry(id) {
+  const data = loadData().filter(d => d.id !== id);
+  saveData(data);
+  renderData();
+  document.getElementById('header-count').textContent = data.length;
+}
+
+function clearData() {
+  if (confirm('Delete all logged objections? This cannot be undone.')) {
+    saveData([]);
+    renderData();
+    document.getElementById('header-count').textContent = '0';
+    updateQuickTags();
+  }
+}
+
+function exportCSV() {
+  const data = loadData();
+  if (!data.length) { alert('No data to export.'); return; }
+  const headers = ['Date','Objection','Category','Response','Outcome','Notes'];
+  const rows = data.map(d => [d.date, d.objection, d.category, d.response, d.outcome, d.notes].map(v => `"${(v||'').replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'objections_data.csv';
+  a.click();
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── API Key ──────────────────────────────────────
+function saveApiKey(val) {
+  val = val.trim();
+  localStorage.setItem('cobalttech_api_key', val);
+  const status = document.getElementById('api-key-status');
+  const card = document.getElementById('api-key-card');
+  const input = document.getElementById('api-key-input');
+  if (val.startsWith('sk-ant-')) {
+    status.textContent = '✓ API Key Connected';
+    status.style.color = 'var(--success)';
+    card.style.padding = '10px 16px';
+    card.style.borderColor = 'rgba(61,220,132,0.25)';
+    input.style.display = 'none';
+    document.querySelector('#api-key-card .card-title').style.display = 'none';
+    status.style.fontSize = '13px';
+    status.style.fontWeight = '600';
+  } else if (val.length > 0) {
+    status.textContent = '⚠ Should start with sk-ant-...';
+    status.style.color = 'var(--danger)';
+    input.style.display = 'block';
+    card.style.padding = '24px';
+    card.style.borderColor = 'rgba(79,142,247,0.3)';
+    document.querySelector('#api-key-card .card-title').style.display = 'block';
+  } else {
+    status.textContent = 'No key saved — get yours at console.anthropic.com';
+    status.style.color = 'var(--muted)';
+    input.style.display = 'block';
+    card.style.padding = '24px';
+    card.style.borderColor = 'rgba(79,142,247,0.3)';
+    document.querySelector('#api-key-card .card-title').style.display = 'block';
+  }
+}
+
+function loadApiKey() {
+  const saved = localStorage.getItem('cobalttech_api_key') || '';
+  if (saved) {
+    document.getElementById('api-key-input').value = saved;
+    saveApiKey(saved);
+  }
+}
+
+// ─── Init ─────────────────────────────────────────
+updateQuickTags();
+loadApiKey();
+</script>
+</body>
+</html>
