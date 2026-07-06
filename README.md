@@ -2,6 +2,8 @@ ObjectionIQ
 
 
 
+objectioniq.vercel.app (connect your api and give it a try)
+
 
 
 AI-powered objection handling for real-time sales conversations.
@@ -117,3 +119,8 @@ Status
 
 
 Early-stage, actively being developed.
+
+
+
+
+YOUR API IS NOT SAVED ANYWHERE OR IMPLEMENTED IN THE CODE OR ANY ENV FILES IF YOU ARE WORRIED YOU CAN CAP YOU API SPENDING LIMITS.
